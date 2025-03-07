@@ -72,6 +72,8 @@ if [ "$DEFAULT_BRANCH" != "master" ]; then
   throw "The default branch for $REPO_OWNER/$REPO_NAME is not 'master'."
 fi
 
+# Github Secondary Rate Limit Workaround
+sleep 0.3
 # Construct the URL to the commits page for the default branch
 COMMITS_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/commits/${DEFAULT_BRANCH}"
 
