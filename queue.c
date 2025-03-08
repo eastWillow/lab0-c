@@ -194,7 +194,7 @@ void q_sort(struct list_head *head, bool descend)
                 p = p->next;
                 char *n_value =
                     list_entry(n, element_t, list)->value /* IIII */;
-                if (strcmp(n_value, value) > 0) {
+                if (!descend && strcmp(n_value, value) > 0) {
                     n->next = right;
                     right = n;
                 } else {
@@ -240,6 +240,38 @@ int q_descend(struct list_head *head)
  * order */
 int q_merge(struct list_head *head, bool descend)
 {
-    // https://leetcode.com/problems/merge-k-sorted-lists/
-    return 0;
+    // input list_head *head from &chain.head
+    size_t len = 0;
+    // No effect if there is only one queue in the chain
+    if (head->next->next == head->next)
+        return q_size(head->next);
+    // merge form lib /list_sort.c
+    struct list_head **tail = &head;
+    struct list_head *a = head->next->next;
+    struct list_head *b = head->next;
+    for (;;) {
+        /* if equal, take 'a' -- important for sort stability */
+        if (descend && strcmp(list_entry(a, element_t, list)->value,
+                              list_entry(b, element_t, list)->value) <= 0) {
+            *tail = a;
+            tail = &a->next;
+            a = a->next;
+            len++;
+            if (!a) {
+                *tail = b;
+                break;
+            }
+        } else {
+            *tail = b;
+            tail = &b->next;
+            b = b->next;
+            len++;
+            if (!b) {
+                *tail = a;
+                break;
+            }
+        }
+    }
+    // Return: the number of elements in queue after merging
+    return len;
 }
