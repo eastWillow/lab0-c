@@ -143,7 +143,82 @@ void q_reverseK(struct list_head *head, int k)
 }
 
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+// refer to Week1 Homework q3
+static void rebuild_list_link(struct list_head *head)
+{
+    if (!head)
+        return;
+    struct list_head *node, *prev;
+    prev = head;
+    node = head->next;
+    while (node) {
+        node->prev = prev;
+        prev = node;
+        node = node->next;
+    }
+    prev->next = head;
+    head->prev = prev; /* GGGG */
+}
+
+struct list_head *list_tail(struct list_head *head)
+{
+    while (head && head->next)
+        head = head->next;
+    return head;
+}
+
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head)
+        return;
+    if (list_empty(head))
+        return;
+    if (q_size(head) == 1)
+        return;
+
+    int i = 0;
+#define MAX_NODES 100000
+    struct list_head *begin[MAX_NODES];
+    struct list_head *result = NULL, *left = NULL, *right = NULL;
+    begin[0] = head->next;
+    head->prev->next = NULL;
+    while (i >= 0) {
+        struct list_head *L = begin[i], *R = list_tail(begin[i]);
+        if (L != R) {
+            struct list_head *pivot = L;
+            char *value = list_entry(pivot, element_t, list)->value /* HHHH */;
+            struct list_head *p = pivot->next;
+            pivot->next = NULL; /* break the list */
+            while (p) {
+                struct list_head *n = p;
+                p = p->next;
+                char *n_value =
+                    list_entry(n, element_t, list)->value /* IIII */;
+                if (strcmp(n_value, value) > 0) {
+                    n->next = right;
+                    right = n;
+                } else {
+                    n->next = left;
+                    left = n;
+                }
+            }
+            begin[i] = left;
+            begin[i + 1] = pivot /* JJJJ */;
+            begin[i + 2] = right /* KKKK */;
+            left = right = NULL;
+            i += 2;
+        } else {
+            if (L) {
+                L->next = result;
+                result = L;
+            }
+            i--;
+        }
+    }
+    head->next = result;
+    rebuild_list_link(head);
+#undef MAX_NODES
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
